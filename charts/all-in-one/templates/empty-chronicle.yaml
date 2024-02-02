@@ -22,7 +22,7 @@ spec:
       initContainers:
         - args:
           - 'https://snapshots.nine-chronicles.com/{{ $.Values.snapshot.path }}'
-          - /data
+          - /data/empty-chronicle
           - $(RESET_SNAPSHOT_OPTION)
           - empty-chronicle
           - $(SLACK_WEBHOOK_URL)
@@ -40,23 +40,35 @@ spec:
             - mountPath: /data
               name: empty-chronicle-data
           env:
-          - name: RESET_SNAPSHOT_OPTION
-            value: "false"
+          - name: RESET_SNAPSHOT_OPTION  
+            value: "{{ $.Values.global.resetSnapshot }}"
+          - name: SNAPSHOT_ROLLBACK_OPTION
+            value: "{{ $.Values.global.rollbackSnapshot }}"
           - name: SLACK_WEBHOOK_URL
             valueFrom:
               secretKeyRef:
-                name: slack
                 key: slack-webhook-url
+                name: slack
       containers:
         - name: empty-chronicle
           image: "{{ .Values.emptyChronicle.image.repository }}:{{ .Values.emptyChronicle.image.tag }}"
           imagePullPolicy: Always
+          args:
+            {{ if eq(.Values.emptyChronicle.network, "heimdall") }}
+            - --heimdall
+            {{ else if eq(.Values.emptyChronicle.network, "odin") }}
+            - --odin
+            {{ else }}
+            {{ fail "Invalid network"}}
+            {{ end }}
           env:
             - name: PN_AppProtocolVersionToken
               value: {{ $.Values.global.appProtocolVersion }}
+            - name: PN_StorePath
+              value: /data/empty-chronicle
           ports:
             - name: http
-              containerPort: {{ .Values.emptyChronicle.ports.port }}
+              containerPort: 5009
               protocol: TCP
           resources:
             {{- toYaml .Values.emptyChronicle.resources | nindent 12 }}

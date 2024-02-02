@@ -658,10 +658,10 @@ spec:
   ports:
   - name: http
     port: 80
-    targetPort: {{ $.Values.emptyChronicle.ports.port }}
+    targetPort: 5009
   - name: https
     port: 443
-    targetPort: {{ $.Values.emptyChronicle.ports.port }}
+    targetPort: 5009
   selector:
     app: empty-chronicle
   type: LoadBalancer

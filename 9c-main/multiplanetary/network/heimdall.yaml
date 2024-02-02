@@ -503,7 +503,14 @@ jwtHeadless:
     eks.amazonaws.com/nodegroup: heimdall-2c_spot
 
 emptyChronicle:
-  enabled: false
+  enabled: true
+  resources:
+    requests:
+      cpu: 1
+      memory: 8Gi
+  network: "heimdall"
+  storage:
+    data: 1000Gi
 
 remoteActionEvaluatorHeadless:
   enabled: false
